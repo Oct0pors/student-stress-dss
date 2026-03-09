@@ -172,9 +172,13 @@ def main():
 
         st.markdown("---")
         st.subheader("🔬 Mathematical Framework")
-        st.markdown("""
+        
+        # Use a raw string (r) and $$ for display math
+        st.markdown(r"""
         The model assumes student stress variables follow a distribution where the mean stress level converges as sample size increases.
-        \$ S_n = \frac{1}{n}\sum_{i}^{n} X_i \$
+
+        $$S_n = \frac{1}{n}\sum_{i}^{n} X_i$$
+
         As $n \to \infty$, $\sqrt{n}(S_n - \mu)$ converges to $\mathcal{N}(0, \sigma^2)$.
         """)
 
@@ -328,4 +332,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
