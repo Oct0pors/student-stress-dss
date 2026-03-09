@@ -111,35 +111,26 @@ def main():
             st.info("Can machine learning models accurately predict academic stress levels?")
             st.write("This DSS aims to shift the paradigm to **proactive intervention**.")
 
-    # --- PAGE 2: EXPLORATORY DATA ANALYSIS (EDA) ---
-    elif page == "Exploratory Data Analysis":
-        st.markdown('<h1 class="main-header">Exploratory Data Analysis</h1>', unsafe_allow_html=True)
+   # --- PAGE 2: EXPLORATORY DATA ANALYSIS (EDA) ---
+elif page == "Exploratory Data Analysis":
+    st.markdown('<h1 class="main-header">Exploratory Data Analysis</h1>', unsafe_allow_html=True)
+    
+    data = load_project_data()
+    
+    st.write(f"### Statistical Overview (n={len(data)} observations)")
+    st.dataframe(data.describe(), use_container_width=True)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("🔗 Correlation Matrix")
+        fig, ax = plt.subplots(figsize=(6, 5))
         
-        data = load_project_data()
+        # FIX: Added 'numeric_only=True' to prevent the ValueError
+        corr_matrix = data.corr(numeric_only=True)
         
-        st.write(f"### Statistical Overview (n={len(data)} observations)")
-        st.dataframe(data.describe(), use_container_width=True)
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            st.subheader("🔗 Correlation Matrix")
-            fig, ax = plt.subplots(figsize=(6, 5))
-            sns.heatmap(data.corr(), annot=True, cmap='RdYlGn', ax=ax, fmt=".2f")
-            st.pyplot(fig)
-            st.caption("Pearson Correlation Coefficient (r).")
-        
-        with col2:
-            st.subheader("📈 Stress Distribution")
-            fig2, ax2 = plt.subplots(figsize=(6, 5))
-            sns.histplot(data['Academic Stress Index'], bins=5, kde=True, ax=ax2, color='#2E86AB')
-            st.pyplot(fig2)
-            
-        st.subheader("📉 Feature Importance")
-        importance_df = pd.DataFrame({
-            'Feature': ['Peer Pressure', 'Home Pressure', 'Behavioral Habits'],
-            'Importance': [0.45, 0.35, 0.20]
-        })
-        st.bar_chart(importance_df.set_index('Feature'))
+        sns.heatmap(corr_matrix, annot=True, cmap='RdYlGn', ax=ax, fmt=".2f")
+        st.pyplot(fig)
+        st.caption("Pearson Correlation Coefficient (r) for numeric features.")
 
     # --- PAGE 3: STRESS PREDICTOR ---
     elif page == "Stress Predictor":
@@ -177,3 +168,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
