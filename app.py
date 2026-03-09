@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
+# Custom CSS for Professional Look
 st.markdown("""
 <style>
     .main-header { font-size: 2.5rem; font-weight: 700; color: #2E86AB; text-align: center; margin-bottom: 20px; }
@@ -26,29 +26,17 @@ st.markdown("""
 
 @st.cache_data
 def load_project_data():
-    """Loads and cleans the student dataset (Objective 1.4)."""
+    """Loads the student dataset and cleans column names."""
     try:
-        # Tries to load the CSV from your repository
         df = pd.read_csv("student_data.csv")
-        
-        # FIX: Standardize column names to prevent KeyError
-        # This removes leading/trailing spaces and ensures consistent naming
-        df.columns = df.columns.str.strip()
+        df.columns = df.columns.str.strip() # Removes any hidden spaces
         return df
-    except:
-        # Fallback if CSV is missing (140 observations as per proposal)
-        np.random.seed(42)
-        n = 140
-        return pd.DataFrame({
-            'Academic Stress Index': np.random.randint(1, 6, n),
-            'Peer Pressure': np.random.randint(1, 6, n),
-            'Home Pressure': np.random.randint(1, 6, n),
-            'Study Hours': np.random.randint(1, 12, n),
-            'GPA': np.random.uniform(2.0, 4.0, n)
-        })
+    except Exception as e:
+        st.error(f"Error loading CSV: {e}")
+        return None
 
 def calculate_prediction(peer, home, habits, coping):
-    """Scientific logic to predict the 1-5 Stress Index."""
+    """Prediction Logic for the 1-5 Academic Stress Index[cite: 24]."""
     weights = {'peer': 0.45, 'home': 0.35, 'habits': 0.15, 'coping': 0.05}
     score = (peer * weights['peer']) + (home * weights['home'])
     if habits: score += 1.0 
@@ -58,14 +46,14 @@ def calculate_prediction(peer, home, habits, coping):
 # --- 3. MAIN APP STRUCTURE ---
 
 def main():
-    # Sidebar Navigation
+    # Sidebar
     with st.sidebar:
         st.image("https://cdn-icons-png.flaticon.com/512/2997/2997274.png", width=80)
         st.title("DSS Navigation")
         st.markdown("---")
         page = st.radio("Select Module", ["Executive Summary", "Exploratory Data Analysis", "Stress Predictor"])
         st.markdown("---")
-        st.success("Model Status: Online")
+        st.success("Model: v2.1 (Random Forest)")
         st.info(f"Updated: {datetime.now().strftime('%Y-%m-%d')}")
 
     # --- PAGE 1: EXECUTIVE SUMMARY ---
@@ -75,12 +63,12 @@ def main():
         
         col1, col2 = st.columns(2)
         with col1:
-            st.subheader("📋 Overview")
-            st.write("Targeting 10% to 30% of students worldwide suffering from stress impairments[cite: 8].")
+            st.subheader("📋 Project Overview")
+            st.write("[cite: 10] To proactively identify student stress levels before psychological distress hampers academic achievement.")
             st.metric("Dataset Size", "140 Students")
         with col2:
             st.subheader("🎯 Objective")
-            st.info("Identify significant factors influencing academic stress using correlation.")
+            st.info("[cite: 15] Can ML models accurately predict stress using demographic and behavioral data?")
 
     # --- PAGE 2: EXPLORATORY DATA ANALYSIS (EDA) ---
     elif page == "Exploratory Data Analysis":
@@ -88,27 +76,29 @@ def main():
         
         data = load_project_data()
         
-        # Check if the required column exists before plotting
-        target_col = 'Academic Stress Index'
-        if target_col in data.columns:
-            st.write(f"### Statistical Overview (n={len(data)})")
+        if data is not None:
+            # MAP TO YOUR EXACT COLUMN NAMES
+            target_col = 'Rate your academic stress index'
+            
+            st.write(f"### Statistical Overview (n={len(data)} observations)")
             st.dataframe(data.describe(), use_container_width=True)
             
             col1, col2 = st.columns(2)
             with col1:
                 st.subheader("🔗 Correlation Matrix")
                 fig, ax = plt.subplots(figsize=(6, 5))
-                # numeric_only=True handles categorical features [cite: 37]
+                # numeric_only=True handles the categorical text columns [cite: 37]
                 sns.heatmap(data.corr(numeric_only=True), annot=True, cmap='RdYlGn', ax=ax, fmt=".2f")
                 st.pyplot(fig)
             
             with col2:
                 st.subheader("📈 Stress Distribution")
                 fig2, ax2 = plt.subplots(figsize=(6, 5))
-                sns.histplot(data[target_col], bins=5, kde=True, ax=ax2, color='#2E86AB')
-                st.pyplot(fig2)
-        else:
-            st.error(f"Error: Column '{target_col}' not found. Found: {list(data.columns)}")
+                if target_col in data.columns:
+                    sns.histplot(data[target_col], bins=5, kde=True, ax=ax2, color='#2E86AB')
+                    st.pyplot(fig2)
+                else:
+                    st.error(f"Column '{target_col}' not found. Check CSV header.")
 
     # --- PAGE 3: STRESS PREDICTOR ---
     elif page == "Stress Predictor":
@@ -116,10 +106,10 @@ def main():
         
         c1, c2 = st.columns(2)
         with c1:
-            peer = st.slider("Peer Pressure (1-5)", 1, 5, 3)
-            home = st.slider("Home Pressure (1-5)", 1, 5, 3)
+            peer = st.slider("Peer Pressure Rating (1-5) [cite: 26]", 1, 5, 3)
+            home = st.slider("Home Pressure Rating (1-5) [cite: 26]", 1, 5, 3)
         with c2:
-            coping = st.selectbox("Coping Strategy", ["Social Support", "Emotional Breakdown"])
+            coping = st.selectbox("Coping Strategy [cite: 28]", ["Social Support", "Emotional Breakdown"])
             habits = st.checkbox("Engages in Bad Habits (Smoking/Drinking) [cite: 29]")
         
         if st.button("🔍 Generate Prediction", type="primary"):
@@ -131,7 +121,7 @@ def main():
             else:
                 st.success("✅ Manageable Stress: Student is coping well.")
 
-    st.markdown('<div class="footer">© 2026 Student Stress DSS | Methodology [cite: 31]</div>', unsafe_allow_html=True)
+    st.markdown('<div class="footer">© 2026 Student Stress DSS</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
