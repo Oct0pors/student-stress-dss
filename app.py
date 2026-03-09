@@ -44,14 +44,24 @@ EXPECTED_COLUMNS = {
 
 @st.cache_data
 def load_project_data():
-    """Loads the student dataset and cleans column names."""
     try:
         df = pd.read_csv("student_data.csv")
+        # Clean white spaces from headers
         df.columns = df.columns.str.strip()
+        
+        # Manually mapping your specific CSV headers to the code's variables
+        column_mapping = {
+            'Rate your academic stress index': 'Rate your academic stress index',
+            'Peer pressure': 'Peer Pressure',
+            'Academic pressure from your home': 'Home Pressure',
+            'Study Environment': 'Study Environment',
+            'What coping strategy you use as a student?': 'Coping Strategy',
+            'Do you have any bad habits like smoking, drinking on a daily basis?': 'Bad Habits',
+            'Your Academic Stage': 'Academic Stage'
+        }
+        # Rename columns to match what the rest of the app expects
+        df = df.rename(columns=column_mapping)
         return df
-    except FileNotFoundError:
-        st.error("⚠️ **File Not Found:** Please ensure 'student_data.csv' is in the same directory.")
-        return None
     except Exception as e:
         st.error(f"Error loading CSV: {e}")
         return None
@@ -318,3 +328,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
